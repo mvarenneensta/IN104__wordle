@@ -4,8 +4,8 @@
 #include <string.h>
 #define NB_MOTS (78855)
 
-
-char** chargerdico(int nb_lettres,char* fname){
+/* Création d'un dictionnaire de mots de 5 lettres */
+char** chargerdico(int NB_LETTRES,char* fname){
     FILE *in=fopen(fname,"rb");
     if (in==NULL){
     printf("erreur lors de l'ouverture du fichier");
@@ -19,24 +19,21 @@ char** chargerdico(int nb_lettres,char* fname){
 
     int compteur=0;
     fscanf (in,"%s",str);
-    while(feof(in)){
-       if (strlen(str)==nb_lettres){
-           tab[compteur]=str;
+    
+    for(int i=0;i<NB_MOTS;i++){
+       if (strlen(str)==NB_LETTRES){
+            tab[compteur] = malloc ((1 + strlen (str)) * sizeof (char)) ;
+            strcpy(tab[compteur],str);
             compteur ++;
        }
        fscanf (in,"%s",str);
 
     }
+    printf("%d",compteur);
     return tab;
 }
 
-int main(int argc, char const *argv[])
-{
-    int nb_lettres=5;
-    char* fname="dico.txt";
-    chargerdico(nb_lettres,fname);
-    return 0;
-}
+
 
 
 
