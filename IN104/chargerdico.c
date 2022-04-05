@@ -2,10 +2,12 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include "chargerdico.h"
 #define NB_MOTS (78855)
+#define NB_LETTRES (5)
 
 /* Création d'un dictionnaire de mots de 5 lettres */
-char** chargerdico(int NB_LETTRES,char* fname){
+char** charger_dico(char* fname){
     FILE *in=fopen(fname,"rb");
     if (in==NULL){
     printf("erreur lors de l'ouverture du fichier");
@@ -28,8 +30,7 @@ char** chargerdico(int NB_LETTRES,char* fname){
        }
        fscanf (in,"%s",str);
 
-    }
-    printf("%d",compteur);
+    } 
     return tab;
 }
 

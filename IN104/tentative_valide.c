@@ -5,9 +5,9 @@
 #include <math.h>
 #include <string.h>
 #include <stdbool.h>
-#include "dico.txt"
-#include "chargerdico.c"
+#include "tentative_valide.h"
 #define NB_LETTRES (5)
+#define NB_MOTS_5LETTRES (4007)
 
 
 
@@ -20,20 +20,12 @@ bool verifie_nombre(char* str){
 
 
 /*Fonction qui va vérifier si le mot tenté existe bien*/
-bool verifie_dico(char* str, char** tab,int size){
-    for(int i=0;i<size;i++){
-        if(tab[i]==str){
+bool verifie_dico(char* str, char** tab){
+    for(int i=0;i<NB_MOTS_5LETTRES;i++){
+        if(strcmp(tab[i],str)==0){
             return(true);
         }
     }
-    return(false);
+    return(0); 
 }
 
-int main(){
-    char* fname="dico.txt";
-    char** dico=chargerdico(NB_LETTRES,fname);
-    bool in_dico=verifie_dico("patte",dico,NB_MOTS);
-    if(in_dico){
-    printf("True");
-    }
-}
