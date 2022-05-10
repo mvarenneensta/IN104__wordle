@@ -9,6 +9,7 @@
 #define NB_LETTRES (5)
 extern int* indices(char* guess, char* word);
 extern char** charger_dico(char* fname);
+extern double log(double x);
 
 /*Fonction initalisant le tableau de données utile pour la suite*/
 char** create_data() {
@@ -84,26 +85,18 @@ bool mot_valide(char** data,char* word) {
 }
 /* Fonction qui actualise le dictionnaire en retirant à chaque tour les mots non valide*/
 char** actualise_dico(char** dico,char** new_data,int *size_dico){
-    printf("Taille dico : %d\n", *size_dico);
     char** new_dico=malloc(sizeof(char*)*(*size_dico));
     for (int i=0; i<*size_dico;i++) {
         new_dico[i]=malloc(sizeof(char)*5);
     }
-     printf("Taille dico 1 : %d\n", *size_dico);
+
     for(int i=0;i<*size_dico;i++){
     strcpy(new_dico[i],dico[i]);
     }    
-     printf("Taille dico 2: %d\n", *size_dico);
-    
-
     for (int i = 0; i <*size_dico ;) {
-        printf("Taille dico 2: %d\n", *size_dico);
-
         char* word_i=new_dico[i];    
-        
-
         if (!mot_valide(new_data,word_i)) {                     // On retire les mots non valides d'après les nouvelles informations
-        for (int k = i; k < *size_dico; k++) {
+        for (int k = i; k < *size_dico-1; k++) {
             new_dico[k]=new_dico[k+1];
         }
         (*size_dico)--;
@@ -115,6 +108,66 @@ char** actualise_dico(char** dico,char** new_data,int *size_dico){
    char** new_dico1=realloc(new_dico,*size_dico);
    return (new_dico1);
 
+}
+int idxmin(double* t, int sizet) {
+    int i=0;
+    double m=t[0];
+    for (int k=0;k<sizet;k++ ){
+        if(t[k]<m) {
+            m=t[k];
+            i=k;
+        }
+    }
+    return i;
+} 
+
+/*Fonction qui retourne le meilleur mot à jouer à chaque tour*/
+char* bestword(char** dico, char** data, int size_dico) {
+    int m;
+    int ans[5];
+    double* entropies=malloc(sizeof(double)*size_dico);//tableau où on stock la qté d'information gagné pour chaque mot encore jouable
+    for (int i=0;i<size_dico;i++){
+        char* word_i=dico[i];                       //on prend un mot du dico
+        double h=0;                                 //calcul de l'entropie de shannon pour chaque mot
+        for (int i1=1;i1<4;i1++){
+            for (int i2=1;i2<4;i2++){
+                for (int i3=1;i3<4;i3++){
+                    for (int i4=1;i4<4;i4++){
+                        for (int i5=1;i5<4;i5 ++){
+                            ans[0]=i1;
+                            ans[1]=i2;
+                            ans[2]=i3;
+                            ans[3]=i4;
+                            ans[4]=i5;
+                            char** datatest = create_data();
+                            datatest=update_data(datatest,word_i,ans);      //on actualise les data avec une des réponses hypothétiques
+                            m=0;                                            //nombre de mots encore valide après la réponse
+                            for(int k=0;k<size_dico;k++){
+                                if (mot_valide(datatest,dico[k])){
+                                    m++;
+                                    printf("Nombre de mots valides : %s\n",dico[0]);
+                                    printf("Nombre d'it 1: %d\n",k);
+                                }
+                                printf("Nombre d'it 2 : %d\n",m);
+                            }
+                            double n=m;
+                            printf("Nombre de mots valides 2: %d\n",m);
+                            double f=n/size_dico; //f<=1
+                            double l=log(f); //l<=0
+                            h=h-n/size_dico*l;
+                            free(datatest);
+                        }
+
+                    }
+                }
+            }
+        }
+        entropies[i]=h;
+        printf("Entropie du mot%f\n",h);
+    }
+    char* best_word=dico[idxmin(entropies,size_dico)];
+    free(entropies);
+    return best_word;
 }
 
 
@@ -128,7 +181,11 @@ int main(){
     char**data=create_data();
     char** new_data=update_data(data,guess,indic);
     char** new_dico=actualise_dico(dico,new_data,&size_dic);
-    printf("%s",new_dico[234]);
+    char* meilleur_mot=bestword(new_dico,new_data,size_dic);
+    printf("%s\n",meilleur_mot);
+    for(int i=0;i<size_dic;i++){
+        printf("Mot %d : %s\n",i,new_dico[i]);
+    }
     
     
     
