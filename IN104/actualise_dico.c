@@ -83,31 +83,37 @@ bool mot_valide(char** data,char* word) {
     return true;
 }
 /* Fonction qui actualise le dictionnaire en retirant à chaque tour les mots non valide*/
-char** actualise_dico(char** dico,char* guess,int * indices,int *size_dico){
+char** actualise_dico(char** dico,char** new_data,int *size_dico){
+    printf("Taille dico : %d\n", *size_dico);
     char** new_dico=malloc(sizeof(char*)*(*size_dico));
     for (int i=0; i<*size_dico;i++) {
         new_dico[i]=malloc(sizeof(char)*5);
     }
+     printf("Taille dico 1 : %d\n", *size_dico);
     for(int i=0;i<*size_dico;i++){
     strcpy(new_dico[i],dico[i]);
     }    
-    char** data=create_data();
-    char** new_data=update_data(data,guess,indices);        //on met à jour les informations sur le mot
+     printf("Taille dico 2: %d\n", *size_dico);
     
+
     for (int i = 0; i <*size_dico ;) {
-    char* word_i=dico[i];                                   
-    if (!mot_valide(new_data,word_i)) {                     // On retire les mots non valides d'après les nouvelles informations
-    for (int k = i; k < *size_dico-1; k++) {
-        new_dico[k]=new_dico[k+1];
+        printf("Taille dico 2: %d\n", *size_dico);
+
+        char* word_i=new_dico[i];    
+        
+
+        if (!mot_valide(new_data,word_i)) {                     // On retire les mots non valides d'après les nouvelles informations
+        for (int k = i; k < *size_dico; k++) {
+            new_dico[k]=new_dico[k+1];
+        }
+        (*size_dico)--;
+        }
+        else{
+            i++;
+        }
     }
-    size_dico--;
-    }
-    else{
-        i++;
-    }
-    }
-   
-   return (new_dico);
+   char** new_dico1=realloc(new_dico,*size_dico);
+   return (new_dico1);
 
 }
 
@@ -119,8 +125,11 @@ int main(){
     char* guess="LILAS";
     int* indic=indices(guess,mot);
     int size_dic=4007;
-    char** new_dico=actualise_dico(dico,guess,indic,&size_dic);
-    printf("%s",new_dico[0]);
-
-
+    char**data=create_data();
+    char** new_data=update_data(data,guess,indic);
+    char** new_dico=actualise_dico(dico,new_data,&size_dic);
+    printf("%s",new_dico[234]);
+    
+    
+    
 }
