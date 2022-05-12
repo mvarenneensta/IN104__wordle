@@ -1,3 +1,12 @@
+
+/*Jouer le meilleur mot possible*/
+//Création du tableau sur les données connues sur le mot à trouver
+/* code dans le tableau
+u:unknown
+k:known
+n:not in the word
+i:in the word but we don't know where exactly
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -33,7 +42,7 @@ char** copy(char** data){
         copydata [i]=malloc(sizeof(char)*6);
     }
     for (int i=0; i<26;i++) {
-        for (int j=0; j<6;j++) {
+        for (int j=0; j<NB_LETTRES+1;j++) {
             copydata[i][j]=data[i][j];
         }
     }
@@ -43,7 +52,7 @@ char** copy(char** data){
  char** update_data(char** data, char* guess, int* indices){
     char** new_data=copy(data); 
     for(int i=0;i<26;i++){
-        for(int j=1;j<6;j++){
+        for(int j=1;j<NB_LETTRES+1;j++){
             if(new_data[i][0]==guess[j-1]){
                 if(indices[j-1]==1){
                     new_data[i][j]='k';
@@ -63,7 +72,7 @@ char** copy(char** data){
  }
  //Fonction qui informe qu'un mot peut encore être deviné, s'il est jouable
 bool mot_valide(char** data,char* word) {
-    for (int i=1;i<6;i++){      //On vérifie que les lettres plus jouables ne sont pas dans le mot
+    for (int i=1;i<NB_LETTRES+1;i++){      //On vérifie que les lettres plus jouables ne sont pas dans le mot
         int c=0;
         char letter=word[i-1];
         while (letter != data[c][0]) {
@@ -73,14 +82,29 @@ bool mot_valide(char** data,char* word) {
             return false;
         }
     }
-    for(int i=0;i<26;i++){      //On vérifie que les lettres sont bien placées 
-    for(int j=1;j<6;j++){
-        if(data[i][j]=='k' && data[i][0]!=word[j-1]){
-            return false;
-
+    for(int i=0;i<26;i++){                                     
+        for(int j=1;j<NB_LETTRES+1;j++){
+            if(data[i][j]=='k' && data[i][0]!=word[j-1]){        //On vérifie que les lettres bien placées sont également à la même position dans le mot
+                return false;
+            }
+            
+            if(data[i][j]=='i' && data[i][0]==word[j-1]){          // On vérifie que les lettres présentes mal placées sont égalements présentes
+                return false;
+            }
+            if(data[i][j]=='i' && data[i][0!=word[j-1]]){           // On vérifie que les lettres présentes mal placées sont au moins une fois dans le mot
+                bool letter_in=false;
+                for(int l=1;l<NB_LETTRES+1;l++){
+                    if(data[i][0]==word[l-1]){
+                        letter_in=true;
+                    }
+                }
+                if(!letter_in){
+                        return false;
+                    }
+            }
+            
         }
     }
-}
     return true;
 }
 /* Fonction qui actualise le dictionnaire en retirant à chaque tour les mots non valide*/
@@ -105,88 +129,10 @@ char** actualise_dico(char** dico,char** new_data,int *size_dico){
             i++;
         }
     }
-   char** new_dico1=realloc(new_dico,*size_dico);
-   return (new_dico1);
+   
+   return (new_dico);
 
 }
-int idxmin(double* t, int sizet) {
-    int i=0;
-    double m=t[0];
-    for (int k=0;k<sizet;k++ ){
-        if(t[k]<m) {
-            m=t[k];
-            i=k;
-        }
-    }
-    return i;
-} 
-
-/*Fonction qui retourne le meilleur mot à jouer à chaque tour*/
-char* bestword(char** dico, char** data, int size_dico) {
-    int m;
-    int ans[5];
-    double* entropies=malloc(sizeof(double)*size_dico);//tableau où on stock la qté d'information gagné pour chaque mot encore jouable
-    for (int i=0;i<size_dico;i++){
-        char* word_i=dico[i];                       //on prend un mot du dico
-        double h=0;                                 //calcul de l'entropie de shannon pour chaque mot
-        for (int i1=1;i1<4;i1++){
-            for (int i2=1;i2<4;i2++){
-                for (int i3=1;i3<4;i3++){
-                    for (int i4=1;i4<4;i4++){
-                        for (int i5=1;i5<4;i5 ++){
-                            ans[0]=i1;
-                            ans[1]=i2;
-                            ans[2]=i3;
-                            ans[3]=i4;
-                            ans[4]=i5;
-                            char** datatest = create_data();
-                            datatest=update_data(datatest,word_i,ans);      //on actualise les data avec une des réponses hypothétiques
-                            m=0;                                            //nombre de mots encore valide après la réponse
-                            for(int k=0;k<size_dico;k++){
-                                if (mot_valide(datatest,dico[k])){
-                                    m++;
-                                    printf("Nombre de mots valides : %s\n",dico[0]);
-                                    printf("Nombre d'it 1: %d\n",k);
-                                }
-                                printf("Nombre d'it 2 : %d\n",m);
-                            }
-                            double n=m;
-                            printf("Nombre de mots valides 2: %d\n",m);
-                            double f=n/size_dico; //f<=1
-                            double l=log(f); //l<=0
-                            h=h-n/size_dico*l;
-                            free(datatest);
-                        }
-
-                    }
-                }
-            }
-        }
-        entropies[i]=h;
-        printf("Entropie du mot%f\n",h);
-    }
-    char* best_word=dico[idxmin(entropies,size_dico)];
-    free(entropies);
-    return best_word;
-}
 
 
-int main(){
-    char* fname="dico.txt";
-    char** dico=charger_dico(fname);
-    char* mot="ALLER";
-    char* guess="LILAS";
-    int* indic=indices(guess,mot);
-    int size_dic=4007;
-    char**data=create_data();
-    char** new_data=update_data(data,guess,indic);
-    char** new_dico=actualise_dico(dico,new_data,&size_dic);
-    char* meilleur_mot=bestword(new_dico,new_data,size_dic);
-    printf("%s\n",meilleur_mot);
-    for(int i=0;i<size_dic;i++){
-        printf("Mot %d : %s\n",i,new_dico[i]);
-    }
-    
-    
-    
-}
+

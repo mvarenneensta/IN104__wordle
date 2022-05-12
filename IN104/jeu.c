@@ -8,6 +8,8 @@
 #include "chargerdico.h"
 #include "afficher_indice.h"
 #include "tentative_valide.h"
+#include "actualise_dico.h"
+#include "meilleur_mot.h"
 #define NB_LETTRES (5)
 #define NB_MOTS_5LETTRES (4007)
 extern char** charger_dico(char* fname);
@@ -15,6 +17,13 @@ extern bool verifie_nombre(char* mot);
 extern bool verifie_dico(char* word,char** dico);
 extern int* indices(char*guess, char* mot);
 extern void afficher_indices(int* indices);
+extern char** create_data();
+extern char** copy(char** data);
+extern char** update_data(char** data, char* guess, int* indices);
+extern bool mot_valide(char** data,char* word);
+extern char** actualise_dico(char** dico,char** new_data,int *size_dico);
+extern char* bestword(char** dico, char** data, int size_dico);
+
 
 
 
@@ -63,7 +72,7 @@ int main(int argc, char const *argv[])
     srand(time(NULL));
     nb_rand=rand()%NB_MOTS_5LETTRES;
     char* mot_rand=dico[nb_rand];
-
+    int size_dic=4007;
     /* Début des essais*/
     while(compteur<6){
         //L'utilisateur tente un mot
@@ -90,7 +99,20 @@ int main(int argc, char const *argv[])
             tab_indices=indices(guess,mot_rand);
             afficher_indices(tab_indices);
             compteur++;
+        
+
+        //Conseil de l'ordinateur
+            char** data=create_data();
+            char** new_data=update_data(data,guess,tab_indices);
+            char** new_dico=actualise_dico(dico,new_data,&size_dic);
+            printf("%d\n",size_dic);
+            char* meilleur_mot=bestword(new_dico,new_data,size_dic);
+            printf("Meilleur mot à jouer : %s\n",meilleur_mot);
+            dico=new_dico;
+
+
         }
+
     }
     if(compteur>=6){
         printf("Perdu ! Le mot était : %s",mot_rand);
