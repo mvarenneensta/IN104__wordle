@@ -18,11 +18,11 @@ extern char** update_data(char** data, char* guess, int* indices);
 extern bool mot_valide(char** data,char* word);
 extern char** actualise_dico(char** dico,char** new_data,int *size_dico);
 
-int idxmin(double* t, int sizet) {
+int idxmax(double* t, int sizet) {
     int i=0;
     double m=t[0];
     for (int k=0;k<sizet;k++ ){
-        if(t[k]<m) {
+        if(t[k]>m) {
             m=t[k];
             i=k;
         }
@@ -72,7 +72,7 @@ char* bestword(char** dico, char** data, int size_dico) {
         }
         entropies[i]=h;
     }
-    char* best_word=dico[idxmin(entropies,size_dico)];
+    char* best_word=dico[idxmax(entropies,size_dico)];
     free(entropies);
     return best_word;
 }
