@@ -4,6 +4,6 @@
 int idxmin(double* t, int sizet);
 
 /*Fonction qui retourne le meilleur mot à jouer à chaque tour*/
-char* bestword(char** dico, char** data, int size_dico);
+char* bestword(char** dico, char** data, int size_dico,int NB_LETTRES);
 
 #endif

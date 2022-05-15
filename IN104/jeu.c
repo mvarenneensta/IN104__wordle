@@ -10,19 +10,17 @@
 #include "tentative_valide.h"
 #include "actualise_dico.h"
 #include "meilleur_mot.h"
-#define NB_LETTRES (5)
-#define NB_MOTS_5LETTRES (4007)
-extern char** charger_dico(char* fname);
-extern bool verifie_nombre(char* mot);
-extern bool verifie_dico(char* word,char** dico);
-extern int* indices(char*guess, char* mot);
-extern void afficher_indices(int* indices);
-extern char** create_data();
-extern char** copy(char** data);
-extern char** update_data(char** data, char* guess, int* indices);
-extern bool mot_valide(char** data,char* word);
-extern char** actualise_dico(char** dico,char** new_data,int *size_dico);
-extern char* bestword(char** dico, char** data, int size_dico);
+extern char** charger_dico(char* fname,int NB_LETTRES,int *TAILLE_DICO);
+extern bool verifie_nombre(char* mot,int NB_LETTRES);
+extern bool verifie_dico(char* word,char** dico,int TAILLE_DICO);
+extern int* indices(char*guess, char* mot,int NB_LETTRES);
+extern void afficher_indices(int* indices,int NB_LETTRES);
+extern char** create_data(int NB_LETTRES);
+extern char** copy(char** data,int NB_LETTRES);
+extern char** update_data(char** data, char* guess, int* indices,int NB_LETTRES);
+extern bool mot_valide(char** data,char* word,int NB_LETTRES);
+extern char** actualise_dico(char** dico,char** new_data,int *size_dico,int NB_LETTRES);
+extern char* bestword(char** dico, char** data, int size_dico,int NB_LETTRES);
 
 
 
@@ -61,19 +59,24 @@ int main(int argc, char const *argv[])
     printf("~ -> dans le mot et mal placé\n");
     printf("X -> mal placé et pas dans le mot\n");
 
+    /*On demande à l'utilisateur avec combien de lettres il veut jouer*/
+    printf("\nNombre de lettres :");
+    int NB_LETTRES;
+    scanf("%d",&NB_LETTRES);
 
     /* On détermine le mot à deviner de manière aléatoire*/
 
     char* fname="dico.txt";
-    char** dico=charger_dico(fname);
-
+    int size_dic;
+    char** dico=charger_dico(fname,NB_LETTRES,&size_dic);
+    printf("%d",size_dic);
+    printf("%s",dico[1]);
     int compteur=0;
     int nb_rand;
     srand(time(NULL));
-    nb_rand=rand()%NB_MOTS_5LETTRES;
+    nb_rand=rand()%size_dic;
     char* mot_rand=dico[nb_rand];
-    int size_dic=4007;
-    char** data=create_data();
+    char** data=create_data(NB_LETTRES);
     /* Début des essais*/
     while(compteur<6){
         //L'utilisateur tente un mot
@@ -81,12 +84,12 @@ int main(int argc, char const *argv[])
         printf("\nMot tenté :");
         scanf("%s",guess);
         //Vérification de la taille du mot
-        if(!verifie_nombre(guess)){
+        if(!verifie_nombre(guess,NB_LETTRES)){
             printf("Mot trop court !\n");
             compteur++;
         }
         //Vérification de l'existence du mot
-        if(!verifie_dico(guess,dico)){
+        if(!verifie_dico(guess,dico,size_dic)){
             printf("Ce mot n'existe pas !\n");
             compteur++;
         }
@@ -95,16 +98,16 @@ int main(int argc, char const *argv[])
             printf("Vous avez gagné !!\n");
             break;
         }
-        if(verifie_nombre(guess) && verifie_dico(guess,dico)){
+        if(verifie_nombre(guess,NB_LETTRES) && verifie_dico(guess,dico,size_dic)){
             int* tab_indices;
-            tab_indices=indices(guess,mot_rand);
-            afficher_indices(tab_indices);
+            tab_indices=indices(guess,mot_rand,NB_LETTRES);
+            afficher_indices(tab_indices,NB_LETTRES);
             compteur++;
             //Conseil de l'ordinateur
-            char** new_data=update_data(data,guess,tab_indices);
-            char** new_dico=actualise_dico(dico,new_data,&size_dic);
+            char** new_data=update_data(data,guess,tab_indices,NB_LETTRES);
+            char** new_dico=actualise_dico(dico,new_data,&size_dic,NB_LETTRES);
             printf("%d\n",size_dic);
-            char* meilleur_mot=bestword(new_dico,new_data,size_dic);
+            char* meilleur_mot=bestword(new_dico,new_data,size_dic,NB_LETTRES);
             printf("Meilleur mot à jouer : %s\n",meilleur_mot);
             dico=new_dico;
             data=new_data;

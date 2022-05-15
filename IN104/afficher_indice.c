@@ -5,7 +5,6 @@
 #include <string.h>
 #include <stdbool.h>
 #include "afficher_indice.h"
-#define NB_LETTRES (5)
 
 
 
@@ -50,7 +49,7 @@ int* tab_occ(char* word){
 }
 
 /* Création d'un tableau qui va ensuite permettre d'afficher les indices  */
-int* indices(char* guess, char* mot){
+int* indices(char* guess, char* mot,int NB_LETTRES){
     
 
     char* mot_sansdoublons=supprimer_doublons(mot);     // Création de la table d'occurences du mot
@@ -59,11 +58,14 @@ int* indices(char* guess, char* mot){
     
     int *tab = malloc (sizeof (int) * NB_LETTRES); // Création du tableau des indices
     for (int i=0;i<NB_LETTRES;i++){
+        tab[i]=-1;                      //on initialise le tableau à -1
+    }           
+    for (int i=0;i<NB_LETTRES;i++){
         for(int j=0;j<size;j++){
         
             if (guess[i]==mot[i] && mot[i]==mot_sansdoublons[j]){
                                                                      // Bonne lettre à la bonne place 
-                tab[i]=1;
+                tab[i]=0;
                 mot_tab_occ[j]--;
 
             }
@@ -73,8 +75,8 @@ int* indices(char* guess, char* mot){
     
     for(int i=0;i<NB_LETTRES;i++){
         for(int j=0;j<size;j++){
-            if (guess[i]==mot_sansdoublons[j] && tab[i]!=1 && mot_tab_occ[j]!=0){     //Bonne lettre à la mauvaise place
-                tab[i]=2;
+            if (guess[i]==mot_sansdoublons[j] && tab[i]!=0 && mot_tab_occ[j]!=0){     //Bonne lettre à la mauvaise place
+                tab[i]=1;
                 mot_tab_occ[j]--;
             }
         }
@@ -82,23 +84,23 @@ int* indices(char* guess, char* mot){
      
     printf("\n");
     for (int i=0;i<NB_LETTRES;i++){
-        if(tab[i]!=1 && tab[i]!=2){                                                   // La lettre n'est pas dans le mot 
-            tab[i]=3;
+        if(tab[i]!=0 && tab[i]!=1){                                                   // La lettre n'est pas dans le mot 
+            tab[i]=2;
         }
     }
     return tab;
 
 }
 /*Fonction affichant les indices*/
-void afficher_indices(int* indices){
+void afficher_indices(int* indices,int NB_LETTRES){
     for(int i=0;i<NB_LETTRES;i++){
-        if(indices[i]==1){
+        if(indices[i]==0){
             printf("o");
         }
-        if(indices[i]==2){
+        if(indices[i]==1){
             printf("~");
         }
-        if(indices[i]==3){
+        if(indices[i]==2){
             printf("x");
         }
     }
