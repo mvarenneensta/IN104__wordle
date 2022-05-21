@@ -73,6 +73,9 @@ int* indices(char* guess, char* mot,int NB_LETTRES){
         tab[i]=-1;                      //on initialise le tableau à -1 car on utilisera la valeur 0
     }           
     for (int i=0;i<NB_LETTRES;i++){
+        tab[i]=-1;                      //on initialise le tableau à -1
+    }           
+    for (int i=0;i<NB_LETTRES;i++){
         for(int j=0;j<size;j++){
         
             if (guess[i]==mot[i] && mot[i]==mot_sansdoublons[j]){
