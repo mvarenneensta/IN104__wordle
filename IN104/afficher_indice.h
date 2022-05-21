@@ -7,7 +7,7 @@ char* supprimer_doublons(char* mot);
 int* tab_occ(char* word);
 
 /* Création d'un tableau qui va ensuite permettre d'afficher les indices  */
-int* indices(char* guess,char* mot);
+int* indices(char* guess,char* mot,int NB_LETTRES);
 /*Fonction affichant les indices*/
-void afficher_indices(int* indices);
+void afficher_indices(int* indices,int NB_LETTRES);
 #endif
