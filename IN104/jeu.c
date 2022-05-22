@@ -55,6 +55,7 @@ int main(int argc, char const *argv[])
 {
     /* Début du jeu : rappel des règles*/
     printf("Vous avez 6 essais pour deviner le mot : bonne chance !\n");
+    printf("Le mot doit être écrit en MAJUSCULES\n");
     printf("O -> bien placé\n");
     printf("~ -> dans le mot et mal placé\n");
     printf("X -> mal placé et pas dans le mot\n");
@@ -64,18 +65,45 @@ int main(int argc, char const *argv[])
     int NB_LETTRES;
     scanf("%d",&NB_LETTRES);
 
+    /*On demande à l'utilisateur s'il veutse challenger en ajoutant un mode diffficile */
+    printf("\nVous aimez le challenge ? :) Jouez en mode difficile. Les indices révélés devront être tous utilisés et vous n'aurez pas accès au choix de l'ordinateur  (y/n)\n");
+    char reponse_mode;
+    scanf("%s",&reponse_mode);
+    bool hard_mode=false;
+    if(strcmp("y",&reponse_mode)==0){
+        hard_mode=true;
+    };
+
+    /*On demande à l'utilisateur s'il veut bénéficier d'une aide de l'ordinateur*/
+    bool help=false;
+    if(!hard_mode){
+        printf("\nSouhaitez vous bénéficier de l'aide de l'ordinateur ? (y/n)\n");
+        char reponse_aide;
+        scanf("%s",&reponse_aide);
+        
+        if(strcmp("y",&reponse_aide)==0){
+            help=true;
+        };
+    }
+
+    
+
+
     /* On détermine le mot à deviner de manière aléatoire*/
 
     char* fname="dico.txt";
+    int SIZE_DIC;
     int size_dic;
-    char** dico=charger_dico(fname,NB_LETTRES,&size_dic);
-    int compteur=0;
+    char** dico=charger_dico(fname,NB_LETTRES,&SIZE_DIC);
+    char** new_dico=charger_dico(fname,NB_LETTRES,&size_dic);
+
     int nb_rand;
     srand(time(NULL));
     nb_rand=rand()%(size_dic+1);
     char* mot_rand=dico[nb_rand];
     char** data=create_data(NB_LETTRES);
     /* Début des essais*/
+    int compteur=0;
     while(compteur<6){
         //L'utilisateur tente un mot
         char* guess=malloc(NB_LETTRES*sizeof(char));
@@ -83,31 +111,46 @@ int main(int argc, char const *argv[])
         scanf("%s",guess);
         //Vérification de la taille du mot
         if(!verifie_nombre(guess,NB_LETTRES)){
-            printf("Nombre de lettres incorrect !\n");
-            compteur++;
+            printf("Nombre de lettres incorrect !\n"); 
+            //on n'ajoute pas +1 au compteur : ce n'est pas compté comme une tentative
         }
         //Vérification de l'existence du mot
-        if(!verifie_dico(guess,dico,size_dic)){
-            printf("Ce mot n'existe pas !\n");
-            compteur++;
+        if(!verifie_dico(guess,dico,SIZE_DIC) && verifie_nombre(guess,NB_LETTRES)){
+            printf("Ce mot n'existe pas !\n");  
+            //on na'joute pas +1 au compteur : ce n'est pas compté comme une tentative
         }
+        // Mode difficile : il faut tenter un mot parmi les mots jouables uniquemtn
+        if(hard_mode){
+            if(!verifie_dico(guess,new_dico,size_dic) && verifie_dico(guess,dico,SIZE_DIC) && verifie_nombre(guess,NB_LETTRES)){
+                printf("Ce mot ne tient pas compte des indices !\n");
+                //on n'ajoute pas +1 au compteur : ce n'est pas compté comme une tentative
+            }
+        }
+
         // Cas du mot juste
         if(strcmp(guess,mot_rand)==0){
             printf("Vous avez gagné !!\n");
             break;
         }
-        if(verifie_nombre(guess,NB_LETTRES) && verifie_dico(guess,dico,size_dic)){
+        if(verifie_nombre(guess,NB_LETTRES) && verifie_dico(guess,new_dico,size_dic) ){
             int* tab_indices;
             tab_indices=indices(guess,mot_rand,NB_LETTRES);
             afficher_indices(tab_indices,NB_LETTRES);
-            compteur++;
-            //Conseil de l'ordinateur
+
+            //Actualisation du dictionnaire si mode difficile ou ordinateur choisi
+            if(hard_mode || help){
             data=update_data(data,guess,tab_indices,NB_LETTRES);
-            dico=actualise_dico(dico,data,&size_dic,NB_LETTRES);
-            printf("%d\n",size_dic);
-            char* meilleur_mot=bestword(dico,data,size_dic,NB_LETTRES);
-            printf("Meilleur mot à jouer : %s\n",meilleur_mot);
+            new_dico=actualise_dico(new_dico,data,&size_dic,NB_LETTRES);
+            }
+
+            //Conseil de l'ordinateur
+            if(help){
+            char* meilleur_mot=bestword(new_dico,data,size_dic,NB_LETTRES);
+            printf("\nMeilleur mot à jouer : %s\n",meilleur_mot);
             printf("Nombre de mots possibles restants : %d\n",size_dic);
+            }
+
+            compteur++; // IL s'agit bien d'une tentative valide 
         }
         free(guess);
 
@@ -115,6 +158,7 @@ int main(int argc, char const *argv[])
     if(compteur>=6){
         printf("Perdu ! Le mot était : %s\n",mot_rand);
     }
+    free(new_dico);
     free(dico);
     free(data);
 
