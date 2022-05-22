@@ -1,7 +1,6 @@
 # IN104__wordle
 Règles du jeu :
--> 6 essais
--> Un mot de 5 lettres
+Vous avez 6 essais pour trouver le mot.
 O -> bien placé
 X -> mal placé et pas dans le mot
 ~ -> dans le mot et mal placé
